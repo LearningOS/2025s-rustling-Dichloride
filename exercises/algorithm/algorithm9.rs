@@ -1,11 +1,11 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
+use std::mem::swap;
 
 pub struct Heap<T>
 where
@@ -38,6 +38,34 @@ where
 
     pub fn add(&mut self, value: T) {
         //TODO
+        self.count += 1;
+        self.items.push(value);
+        let idx = self.items.len() - 1;
+        self.swim(idx);
+    }
+
+    fn swim(&mut self, mut idx: usize) {
+        while idx > 1 {
+            let parent_idx = self.parent_idx(idx);
+            if (self.comparator)(&self.items[idx], &self.items[parent_idx]) {
+                self.items.swap(idx, parent_idx);
+                idx = parent_idx;
+            } else {
+                break;
+            }
+        }
+    }
+
+    fn sink(&mut self, mut idx: usize) {
+        while self.children_present(idx) {
+            let mut child_idx = self.smallest_child_idx(idx);
+            if (self.comparator)(&self.items[child_idx], &self.items[idx]) {
+                self.items.swap(idx, child_idx);
+                idx = child_idx;
+            } else {
+                break;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -58,7 +86,16 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+        let compare = |idx1, idx2| (self.comparator)(&self.items[idx1], &self.items[idx2]);
+        let left_idx = self.left_child_idx(idx);
+        let mut ret = left_idx;
+        if self.right_child_idx(idx) <= self.count {
+            let right_idx = self.right_child_idx(idx);
+            if compare(right_idx, left_idx) {
+                ret = right_idx;
+            }
+        }
+        ret
     }
 }
 
@@ -85,7 +122,16 @@ where
 
     fn next(&mut self) -> Option<T> {
         //TODO
-		None
+        if self.count == 0 {
+            return None;
+        }
+        self.items.swap(1, self.count);
+        let result = self.items.pop();
+        self.count -= 1;
+        if self.count > 0 {
+            self.sink(1);
+        }
+        result
     }
 }
 
